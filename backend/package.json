@@ -1,0 +1,37 @@
+{
+  "name": "crypto-payments-backend",
+  "version": "1.0.0",
+  "description": "Express API server for crypto payment gateway with Supabase integration",
+  "main": "api-server.js",
+  "scripts": {
+    "start": "node api-server.js",
+    "dev": "npm run db:init && nodemon api-server.js",
+    "db:init": "node init-database.js",
+    "logs": "tail -f api-server.log",
+    "clean": "rm -f api-server.log server.log *.out"
+  },
+  "keywords": [
+    "express",
+    "api",
+    "cryptocurrency",
+    "payment-processing",
+    "supabase"
+  ],
+  "author": "ZC82531",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.44.4",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^2.7.0",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
