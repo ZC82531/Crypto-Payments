@@ -1,16 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import './global.css';
+import supabase from './client.jsx';
 
 const CustomerPage = () => {
-
   const username = window.location.pathname.split('/')[1];
 
   const [amount, setAmount] = useState('');
+  const [paymentAgreed, setPaymentAgreed] = useState(false);
+  const [userValid, setUserValid] = useState(true); 
+
+  useEffect(() => {
+
+    const checkUser = async () => {
+      const { data: userData, error: fetchUserError } = await supabase
+        .from('userdata')
+        .select('*')
+        .eq('user', username)
+        .single();
+
+      if (fetchUserError) {
+        console.error('Error fetching user data:', fetchUserError.message);
+        setUserValid(false); 
+      } else if (!userData) {
+
+        setUserValid(false);
+      }
+    };
+
+    checkUser();
+  }, [username]); 
 
   const handleAmountChange = (e) => {
     const value = e.target.value;
-
-  
     if (/^\d*\.?\d{0,2}$/.test(value)) {
       setAmount(value);
     }
@@ -23,17 +45,26 @@ const CustomerPage = () => {
       return;
     }
 
+    if (!userValid) {
+      alert('Invalid user. Cannot proceed with payment.');
+      return;
+    }
+
     sessionStorage.setItem('username', username);
     sessionStorage.setItem('amount', amount);
-
-
-    window.location.href = `/payment`;
+    setPaymentAgreed(true);
   };
+
+  if (!userValid) {
+    return <div style={styles.container}>Invalid user. Cannot proceed with payment. Error 401</div>;
+  }
 
   return (
     <div style={styles.container}>
       <div style={styles.innerContainer}>
-        <h2 style={styles.title}>How much do you want to pay {username.charAt(0).toUpperCase() + username.slice(1)}?</h2>
+        <h2 style={styles.title}>
+          How much do you want to pay {username.charAt(0).toUpperCase() + username.slice(1)}?
+        </h2>
         <form onSubmit={handlePayment} style={styles.form}>
           <label style={styles.label}>
             Enter Amount ($):
@@ -45,8 +76,11 @@ const CustomerPage = () => {
               required
             />
           </label>
-          <button type="submit" style={styles.button}>Proceed to Payment</button>
+          <button type="submit" style={styles.button}>
+            Proceed to Payment
+          </button>
         </form>
+        {paymentAgreed && <Navigate to="/payment" />}
       </div>
     </div>
   );
@@ -60,11 +94,11 @@ const styles = {
     justifyContent: 'center',
     height: '100vh',
     margin: 'auto',
-    padding: '40px', 
+    padding: '40px',
     borderRadius: '20px',
     boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
     background: '#FFFFFF',
-    fontFamily: '"M PLUS Rounded 1c", sans-serif', 
+    fontFamily: '"M PLUS Rounded 1c", sans-serif',
   },
   innerContainer: {
     display: 'flex',
@@ -72,21 +106,21 @@ const styles = {
     alignItems: 'center',
     maxWidth: '400px',
     width: '100%',
-    padding: '30px', 
+    padding: '30px',
     background: 'linear-gradient(135deg, #6C7BD8, #7F00FF)',
-    borderRadius: '16px', 
+    borderRadius: '16px',
     boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
   },
   title: {
     fontSize: '24px',
     fontWeight: 'bold',
-    marginBottom: '30px', 
-    color: '#FFFFFF', 
+    marginBottom: '30px',
+    color: '#FFFFFF',
     textAlign: 'center',
   },
   form: {
     width: '100%',
-    padding: '20px', 
+    padding: '20px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -94,18 +128,18 @@ const styles = {
   label: {
     fontSize: '16px',
     fontWeight: 'bold',
-    marginBottom: '10px', 
+    marginBottom: '10px',
     color: '#FFFFFF',
   },
   input: {
-    padding: '15px', 
-    borderRadius: '10px', 
+    padding: '15px',
+    borderRadius: '10px',
     border: '1px solid #ccc',
     fontSize: '16px',
     width: '100%',
     boxSizing: 'border-box',
     outline: 'none',
-    marginBottom: '20px', 
+    marginBottom: '20px',
     backgroundColor: '#FFFFFF',
   },
   button: {
@@ -113,7 +147,7 @@ const styles = {
     color: 'white',
     border: 'none',
     borderRadius: '50px',
-    padding: '15px 40px', 
+    padding: '15px 40px',
     fontSize: '16px',
     cursor: 'pointer',
     marginTop: '25px',
@@ -121,7 +155,7 @@ const styles = {
     transition: 'background-color 0.3s ease, transform 0.2s ease',
     '&:hover': {
       backgroundColor: '#45A049',
-      transform: 'scale(1.02)', 
+      transform: 'scale(1.02)',
     },
   },
 };

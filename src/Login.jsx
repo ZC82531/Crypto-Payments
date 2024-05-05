@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import supabase from './client.jsx';
 import './global.css';
 
@@ -10,6 +10,7 @@ function Login() {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [loggedIn, setloggedIn] = useState('');
 
   const handleLoginChange = (e) => {
     setLoginData({ ...loginData, [e.target.name]: e.target.value });
@@ -30,7 +31,7 @@ function Login() {
 
       if (loginError) {
         console.error('Error fetching user login data:', loginError.message);
-        setError('An error occurred while fetching user login data');
+        setError('Invalid credentials');
         return;
       }
 
@@ -53,33 +54,37 @@ function Login() {
         .select('*')
         .eq('user', loginData.username)
         .single();
+        console.log(userData);
+
+      if (!userData) {
+          setError('User data not found');
+          return;
+        }
 
       if (userError) {
         console.error('Error fetching user data:', userError.message);
-        setError('An error occurred while fetching user data');
+        setError('Invalid credentials');
         return;
       }
 
-      if (!userData) {
-        setError('User data not found');
-        return;
-      }
+      
 
 
       if (userData.account === "0" && userData.routing === "0") {
       
         sessionStorage.setItem('username', loginData.username);
-        window.location.href = '/finish-signup'; 
-
+        //window.location.href = '/finish-signup'; 
+        setloggedIn('/finish-signup');
       } else {
  
         sessionStorage.setItem('username', loginData.username);
-        window.location.href = '/dashboard';
+        // window.location.href = '/dashboard';
+        setloggedIn('/dashboard');
       }
 
     } catch (error) {
       console.error('Error logging in:', error.message);
-      setError('An error occurred while logging in');
+      setError('Invalid credentials');
     }
   };
 
@@ -118,6 +123,7 @@ function Login() {
             <button type="submit" style={styles.button}>Login</button>
           </form>
         </div>
+        {loggedIn && <Navigate to={loggedIn} />}
         <div style={styles.signupLink}>
           <p>Don't have an account? <Link to="/signup" style={styles.link}>Sign Up</Link></p>
         </div>
