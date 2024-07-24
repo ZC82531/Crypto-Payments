@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import supabase from './client.jsx';
 import QRCode from 'qrcode.react';
 import './global.css';
@@ -10,6 +10,7 @@ const Dashboard = () => {
   const [receivedPayments, setReceivedPayments] = useState([]);
   const [loading, setLoading] = useState(true); 
   const [baseURL, setBaseURL] = useState('');
+  const [signedOut, setsignedOut] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -61,7 +62,8 @@ const Dashboard = () => {
   const handleSignOut = () => {
 
     sessionStorage.clear();
-    window.location.href = '/login'; 
+    // window.location.href = '/login'; 
+    setsignedOut(true);
   };
 
   return (
@@ -82,7 +84,7 @@ const Dashboard = () => {
       <button onClick={handleSignOut} style={styles.signOutButton}>
         Sign Out
       </button>
-
+      {signedOut && <Navigate to='/login' />}
       {loading && <p>Loading...</p>}
       {error && <p>{error}</p>}
       {userData && (

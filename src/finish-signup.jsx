@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import {Navigate} from 'react-router-dom';
 import supabase from './client.jsx';
 import './global.css';
 
@@ -7,6 +8,8 @@ const FinishSignup = () => {
   const [routingNumber, setRoutingNumber] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [signedOut, setsignedOut] = useState(false);
+  const [paymentEntered, setpaymentEntered] = useState(false);
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -69,14 +72,16 @@ const FinishSignup = () => {
 
     console.log('Successfully updated user data');
 
-    window.location.href = '/dashboard'; 
+    // window.location.href = '/dashboard';
+    setpaymentEntered(true); 
   };
 
   const handleSignOut = () => {
   
     sessionStorage.removeItem('username');
 
-    window.location.href = '/login';
+    // window.location.href = '/login';
+    setsignedOut(true);
   };
 
   return (
@@ -84,6 +89,7 @@ const FinishSignup = () => {
       <button onClick={handleSignOut} style={styles.signOutButton}>
         Sign Out
       </button>
+      {signedOut && <Navigate to='/login' />}
       <h2 style={styles.title}>Finish Signup</h2>
       <form onSubmit={handleFormSubmit} style={styles.form}>
         <label style={styles.label}>
@@ -112,6 +118,7 @@ const FinishSignup = () => {
           {loading ? 'Loading...' : 'Submit'}
         </button>
       </form>
+      {paymentEntered && <Navigate to='/dashboard' />}
       {error && <p style={styles.error}>{error}</p>}
     </div>
   );

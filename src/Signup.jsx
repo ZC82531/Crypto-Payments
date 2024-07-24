@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import supabase from './client.jsx';
 import './global.css';
+import { Navigate } from 'react-router-dom';
 
 const Signup = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorText, setErrorText] = useState('');
+  const [signedUp, setsignedUp] = useState(false);
 
   const handleSignup = async (event) => {
     event.preventDefault();
@@ -54,9 +56,11 @@ const Signup = () => {
 
       console.log('User signed up successfully:', userData);
 
+
       setUsername('');
       setPassword('');
       setErrorText('');
+      setsignedUp(true);
     } catch (error) {
       console.error('Error signing up:', error.message);
     }
@@ -90,6 +94,7 @@ const Signup = () => {
           {errorText && <p style={styles.error}>{errorText}</p>}
           <button type="submit" style={styles.button}>Signup</button>
         </form>
+        {signedUp && <Navigate to='/login' /> }
         <p style={styles.loginText}>Already have an account? <Link to="/login" style={styles.link}>Login</Link></p>
       </div>
     </div>
