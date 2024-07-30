@@ -187,13 +187,30 @@ function Login() {
       setSuccess(true);
       
       // Store user info in session storage for quick access
-      // sessionStorage persists until browser tab is closed
-      // Useful for displaying user info without querying database
       sessionStorage.setItem('user_id', data.user.id);
       sessionStorage.setItem('user_email', data.user.email);
-      
-      // Set redirect path (triggers Navigate component to redirect)
-      setloggedIn('/dashboard');
+
+      // Check if this user has completed business setup.
+      // If not, send them there before the dashboard.
+      try {
+        const profileRes = await fetch(
+          `${(await import('./config/api.js')).API_CONFIG.endpoints.businessProfile}`,
+          { headers: { 'Authorization': `Bearer ${data.session.access_token}` } }
+        );
+        if (profileRes.ok) {
+          const profileData = await profileRes.json();
+          if (profileData.business_profile) {
+            setloggedIn('/dashboard');
+          } else {
+            setloggedIn('/business-setup');
+          }
+        } else {
+          // Can't reach backend — still go to dashboard (dashboard will re-check)
+          setloggedIn('/dashboard');
+        }
+      } catch {
+        setloggedIn('/dashboard');
+      }
 
     } catch (error) {
       // ------------------------------------------------------------------------

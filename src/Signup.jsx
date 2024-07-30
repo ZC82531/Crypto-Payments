@@ -170,8 +170,9 @@ const Signup = () => {
       setConfirmPassword('');
       setErrorText('');  // Clear any previous errors
       
-      // Set signedUp to true → This triggers the Navigate component below
-      // which redirects user to the login page
+      // If email verification is disabled, Supabase returns a session immediately.
+      // Redirect straight to business-setup so the user can finish onboarding.
+      // If verification is enabled (no session yet), go to login instead.
       setsignedUp(true);
       
     } catch (error) {
@@ -287,9 +288,10 @@ const Signup = () => {
         </div>
       </div>
 
-      {/* Conditional redirect - navigates to login page after successful signup */}
-      {/* When signedUp becomes true, this Navigate component renders and redirects */}
-      {signedUp && <Navigate to='/login' />}
+      {/* Redirect after signup:
+          - If session exists (email verification off) → go to business-setup
+          - Otherwise → go to login to await verification */}
+      {signedUp && <Navigate to='/business-setup' />}
     </div>
   );
 };

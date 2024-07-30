@@ -20,6 +20,7 @@
   "author": "ZC82531",
   "license": "MIT",
   "dependencies": {
+    "@coinbase/cdp-sdk": "^1.47.0",
     "@supabase/supabase-js": "^2.44.4",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",

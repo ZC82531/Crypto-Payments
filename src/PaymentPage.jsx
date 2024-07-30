@@ -138,7 +138,7 @@ const PaymentPage = () => {
       }
     } catch (error) {
       console.error('Error initiating payment:', error.message);
-      setError('Failed to initiate payment');
+      setError(error.message || 'Failed to initiate payment');
     } finally {
       setLoading(false);
     }

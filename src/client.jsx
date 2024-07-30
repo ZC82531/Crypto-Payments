@@ -34,7 +34,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // VITE_SUPABASE_URL: The address of our Supabase project (like a website URL)
 // If not set, falls back to the hardcoded URL as a safety measure
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://sekekoasxprqrgtephak.supabase.co';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://ciymlfapbhcibaycfdzo.supabase.co';
 
 // VITE_SUPABASE_ANON_KEY: The "anonymous" API key for Supabase
 // This is a PUBLIC key (safe to expose) that allows read-only access

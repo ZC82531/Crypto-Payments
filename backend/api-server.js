@@ -34,6 +34,8 @@ const path = require('path');
 // Supabase gives us both a database (PostgreSQL) and user authentication
 const { createClient } = require('@supabase/supabase-js');
 
+// node-fetch is available in Node 18+; using built-in fetch (Node 25 has it natively)
+
 // ==============================================================================
 // STEP 2: Load configuration from environment variables
 // ==============================================================================
@@ -267,6 +269,8 @@ const authenticateToken = async (req, res, next) => {
       // Token is invalid or expired - reject the request
       return res.status(403).json({ error: 'Invalid or expired token' });
     }
+    // Attach user to request so downstream route handlers can access it
+    req.user = user;
     next();
   } catch (error) {
     // If something unexpected happens, log it and reject the request
@@ -639,6 +643,7 @@ app.get('/api/public/business-profile/:email', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
 
 /**
  * Create payment record (PUBLIC endpoint - called when customer initiates payment)

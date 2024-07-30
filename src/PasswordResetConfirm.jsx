@@ -13,62 +13,37 @@ const PasswordResetConfirm = () => {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    // Handle the password reset using Supabase's built-in session detection
-    const handlePasswordResetSession = async () => {
-      try {
-        // First, let Supabase handle the URL automatically
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        console.log('Current session:', session);
-        console.log('Session error:', error);
+    const code = searchParams.get('code');
 
-        if (error) {
-          console.error('Session error:', error);
-          setError(`Session error: ${error.message}`);
-          return;
-        }
-
-        if (session) {
-          console.log('Valid session found, user can reset password');
-          setValidSession(true);
-        } else {
-          // If no session, try to get the auth event from the URL
-          console.log('No session found, checking URL parameters...');
-          
-          const urlParams = Object.fromEntries(searchParams.entries());
-          console.log('URL params:', urlParams);
-          
-          if (urlParams.code) {
-            // Let Supabase handle the session automatically via auth event
-            setError('Processing reset link... Please wait a moment and refresh if this persists.');
-          } else {
-            setError('Invalid reset link. Please request a new password reset.');
-          }
-        }
-      } catch (error) {
-        console.error('Error checking session:', error);
-        setError(`Error processing reset link: ${error.message}`);
-      }
-    };
-
-    // Listen for auth state changes
+    // Listen for PASSWORD_RECOVERY auth event
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state change:', event, session);
-      
-      if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
-        console.log('Password recovery session established');
+      if (event === 'PASSWORD_RECOVERY') {
         setValidSession(true);
         setError('');
-      } else if (event === 'SIGNED_OUT') {
-        console.log('User signed out');
-        setValidSession(false);
       }
     });
 
-    // Check current session
-    handlePasswordResetSession();
+    const exchangeCode = async () => {
+      if (code) {
+        // PKCE flow: exchange the one-time code for a real session
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          setError('This reset link has expired or already been used. Please request a new one.');
+        }
+        // On success, onAuthStateChange fires PASSWORD_RECOVERY and sets validSession
+      } else {
+        // No code in URL — check if there's already an active recovery session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setValidSession(true);
+        } else {
+          setError('Invalid reset link. Please request a new password reset.');
+        }
+      }
+    };
 
-    // Cleanup subscription
+    exchangeCode();
+
     return () => {
       subscription?.unsubscribe();
     };

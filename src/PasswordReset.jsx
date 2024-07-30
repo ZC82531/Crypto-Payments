@@ -24,8 +24,11 @@ const PasswordReset = () => {
 
     try {
       // Always show the same message for security reasons, regardless of whether email exists
+      // Build the redirect URL from the current origin so this works
+      // in both local dev (localhost:5173) and production (your Netlify domain).
+      const redirectTo = `${window.location.origin}/reset-password-confirm`;
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password-confirm`,
+        redirectTo,
       });
 
       // Don't show specific error messages to prevent email enumeration
