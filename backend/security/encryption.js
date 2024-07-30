@@ -166,7 +166,11 @@ class SecurityService {
       
       // Step 2: Get the encryption key for this user
       // This retrieves the secret key that will actually do the locking
-      const encryptionKey = this.getEncryptionKey(userId, 'encrypt');
+      const encryptionKeyRaw = this.getEncryptionKey(userId, 'encrypt');
+      // Convert hex string to Buffer if needed (createCipheriv requires 32-byte Buffer)
+      const encryptionKey = typeof encryptionKeyRaw === 'string'
+        ? Buffer.from(encryptionKeyRaw, 'hex')
+        : encryptionKeyRaw;
       
       // Step 3: Create the cipher object
       // A cipher is the tool that does the actual encryption

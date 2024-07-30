@@ -42,7 +42,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 // This reads the .env file in this folder and makes those values available
 // Example: process.env.PORT gives us the port number from .env
-dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 // Create the Express app - this will handle all HTTP requests
 const app = express();

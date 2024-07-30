@@ -1,15 +1,12 @@
 /**
  * API Configuration
  * 
- * Centralized configuration for API endpoints.
- * Uses environment variables to support different deployment environments.
+ * Uses relative paths (/api/...) so no domain hardcoding is needed.
+ * - Local dev: Vite proxies /api/* → http://localhost:3001
+ * - Production: Vercel rewrites /api/* → backend deployment (see root vercel.json)
  */
 
-// Get API URL from Vite environment variables (set in Netlify dashboard for production)
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-
-// Ensure no trailing slash
-const baseURL = API_URL.replace(/\/$/, '');
+const baseURL = '';
 
 /**
  * API endpoint configuration
@@ -18,14 +15,14 @@ export const API_CONFIG = {
   baseURL,
   endpoints: {
     // Business profile endpoints
-    businessProfile: `${baseURL}/api/business-profile`,
+    businessProfile: `/api/business-profile`,
     
     // Payment endpoints
-    paymentsHistory: `${baseURL}/api/payments/history`,
-    paymentsCreate: `${baseURL}/api/payments/create`,
+    paymentsHistory: `/api/payments/history`,
+    paymentsCreate: `/api/payments/create`,
     
     // Public endpoints
-    publicBusinessProfile: (username) => `${baseURL}/api/public/business-profile/${username}`,
+    publicBusinessProfile: (username) => `/api/public/business-profile/${username}`,
   }
 };
 
@@ -34,7 +31,7 @@ export const API_CONFIG = {
  */
 export const getApiUrl = (path) => {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${baseURL}${cleanPath}`;
+  return cleanPath;
 };
 
 export default API_CONFIG;

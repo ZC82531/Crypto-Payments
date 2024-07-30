@@ -215,9 +215,11 @@ const Dashboard = () => {
             }
           }
         } catch (businessError) {
-          // If business profile check fails, log warning but continue
-          // This ensures dashboard still loads even if business check fails
+          // Business profile check failed - treat as not set up, force setup
           console.warn('Error checking business profile:', businessError);
+          setNeedsBusinessSetup(true);
+          setLoading(false);
+          return;
         }
 
         // Fetch payment history

@@ -9,6 +9,12 @@ export default defineConfig({
     strictPort: false, // Try next available port if 5173 is busy
     host: true, // Listen on all addresses
     open: false, // Don't auto-open browser
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+    },
   },
   preview: {
     port: 4173,

@@ -3,6 +3,11 @@ import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import supabase from './client.jsx';
 import './global.css';
 
+// Module-level set prevents double-exchange in React StrictMode (which double-invokes
+// effects in development). The one-time code would otherwise be consumed on the first
+// invocation and fail on the second, showing a false "expired" error.
+const _exchangedCodes = new Set();
+
 const PasswordResetConfirm = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -15,41 +20,38 @@ const PasswordResetConfirm = () => {
   useEffect(() => {
     const code = searchParams.get('code');
 
-    // Listen for PASSWORD_RECOVERY auth event
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setValidSession(true);
-        setError('');
-      }
-    });
-
-    const exchangeCode = async () => {
-      if (code) {
-        // PKCE flow: exchange the one-time code for a real session
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (error) {
-          setError('This reset link has expired or already been used. Please request a new one.');
-        } else {
-          // Set valid session immediately — don't rely solely on the PASSWORD_RECOVERY
-          // auth event, which doesn't always fire in Supabase v2 PKCE flow
-          setValidSession(true);
-        }
-      } else {
-        // No code in URL — check if there's already an active recovery session
-        const { data: { session } } = await supabase.auth.getSession();
+    if (!code) {
+      // No code in URL — check if there's already a valid session
+      supabase.auth.getSession().then(({ data: { session } }) => {
         if (session) {
           setValidSession(true);
         } else {
           setError('Invalid reset link. Please request a new password reset.');
         }
+      });
+      return;
+    }
+
+    // Guard against double-invocation in React StrictMode.
+    // exchangeCodeForSession consumes the one-time code — calling it twice
+    // would make the second call fail with "expired". The Set ensures we only
+    // exchange each code once per page load.
+    if (_exchangedCodes.has(code)) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) setValidSession(true);
+      });
+      return;
+    }
+
+    _exchangedCodes.add(code);
+
+    supabase.auth.exchangeCodeForSession(code).then(({ data, error }) => {
+      if (error) {
+        setError('Reset link has expired or is invalid. Please request a new one.');
+      } else if (data?.session) {
+        setValidSession(true);
       }
-    };
-
-    exchangeCode();
-
-    return () => {
-      subscription?.unsubscribe();
-    };
+    });
   }, [searchParams]);
 
   const handlePasswordUpdate = async (event) => {

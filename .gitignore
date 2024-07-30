@@ -24,7 +24,6 @@ build-production/
 .vite/
 .vercel/
 .supabase/.temp/
-supabase/.temp/
 
 # System files
 .DS_Store
@@ -73,6 +72,9 @@ coverage/
 .supabase/
 supabase/.temp/
 supabase/migrations/.temp/
+# Do NOT ignore supabase/migrations (track migration SQL files)
+!supabase/migrations/
+!supabase/migrations/*.sql
 
 # Vercel/Netlify
 .vercel/

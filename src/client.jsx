@@ -58,11 +58,10 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     // Session is stored in localStorage (check browser DevTools > Application > Local Storage)
     persistSession: true,
     
-    // detectSessionInUrl: Check URL for session tokens
-    // Used for magic links and password reset emails
-    // When user clicks email link, Supabase puts a token in the URL
-    // This setting tells Supabase to automatically read and use that token
-    detectSessionInUrl: true,
+    // detectSessionInUrl: Disabled — PasswordResetConfirm manually calls
+    // exchangeCodeForSession(code) so there is no race between the singleton
+    // client auto-processing the code and the component subscribing to events.
+    detectSessionInUrl: false,
     
     // flowType: Use PKCE (Proof Key for Code Exchange) for extra security
     // PKCE is a security enhancement for OAuth flows
