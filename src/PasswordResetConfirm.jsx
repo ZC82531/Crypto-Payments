@@ -29,8 +29,11 @@ const PasswordResetConfirm = () => {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
         if (error) {
           setError('This reset link has expired or already been used. Please request a new one.');
+        } else {
+          // Set valid session immediately — don't rely solely on the PASSWORD_RECOVERY
+          // auth event, which doesn't always fire in Supabase v2 PKCE flow
+          setValidSession(true);
         }
-        // On success, onAuthStateChange fires PASSWORD_RECOVERY and sets validSession
       } else {
         // No code in URL — check if there's already an active recovery session
         const { data: { session } } = await supabase.auth.getSession();
