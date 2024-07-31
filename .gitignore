@@ -1,20 +1,5 @@
 # Node
 node_modules/
-
-# System
-.DS_Store
-.DS_Store.hidden
-
-# Env files
-.env
-.env.*
-.env.local
-.env.local.hidden
-backend/.env
-backend/.env.hidden
-
-# Node modules
-node_modules/
 backend/node_modules/
 
 # Build outputs
@@ -22,23 +7,26 @@ dist/
 build/
 build-production/
 .vite/
-.vercel/
-.supabase/.temp/
-
-# System files
-.DS_Store
-.DS_Store.hidden
-Thumbs.db
 
 # Env files (secrets)
 .env
 .env.*
 .env.local
 .env.local.*
-.env.local.hidden
 backend/.env
 backend/.env.*
-backend/.env.hidden
+
+# Vercel/Netlify
+.vercel/
+.netlify/
+
+# Supabase
+.supabase/
+supabase/.temp/
+
+# Test coverage
+coverage/
+.nyc_output/
 
 # Log files
 npm-debug.log*
@@ -47,35 +35,19 @@ yarn-error.log*
 pnpm-debug.log*
 
 # OS/Editor/IDE
+.DS_Store
+Thumbs.db
 *.swp
 *.swo
-*.swn
 *.bak
 *.tmp
 *.log
 *.pid
-*.seed
 *.pid.lock
 .idea/
 .vscode/
 *.code-workspace
 
-# Test coverage
-coverage/
-.nyc_output/
-
-# Misc
-*.tgz
-*.tar.gz
-
-# Supabase
-.supabase/
-supabase/.temp/
-supabase/migrations/.temp/
-# Do NOT ignore supabase/migrations (track migration SQL files)
+# Do NOT ignore supabase migration SQL files
 !supabase/migrations/
 !supabase/migrations/*.sql
-
-# Vercel/Netlify
-.vercel/
-.netlify/
