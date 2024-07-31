@@ -127,11 +127,11 @@ const PaymentPage = () => {
       if (chargeData && chargeData.data && chargeData.data.hosted_url) {
         console.log('Payment initiated successfully:', chargeData);
 
+        // Save payment record BEFORE redirecting so it is not lost
+        await logPaymentToBackend(chargeData);
+
         // Redirect to payment gateway
         window.location.href = chargeData.data.hosted_url;
-
-        // Log payment initiation
-        logPaymentToBackend(chargeData);
       } else {
         console.error('Payment initiation failed:', chargeData);
         setError('Payment failed. Please try again.');

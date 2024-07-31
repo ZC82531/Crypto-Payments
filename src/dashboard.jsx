@@ -259,6 +259,25 @@ const Dashboard = () => {
     const index = currentURL.indexOf('/', 8);
     const baseURL = index !== -1 ? currentURL.slice(0, index) : currentURL; 
     setBaseURL(baseURL);
+
+    // Poll for payment status updates every 15 seconds
+    const pollInterval = setInterval(async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      try {
+        const res = await fetch(API_CONFIG.endpoints.paymentsHistory, {
+          headers: { 'Authorization': `Bearer ${session.access_token}` }
+        });
+        if (res.ok) {
+          const result = await res.json();
+          if (result.success && result.payments) {
+            setReceivedPayments(result.payments);
+          }
+        }
+      } catch (_) {}
+    }, 15000);
+
+    return () => clearInterval(pollInterval);
   }, []);
 
   const handleSignOut = async () => {

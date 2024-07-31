@@ -5,9 +5,9 @@ A full-stack cryptocurrency payment platform enabling merchants to accept crypto
 
 ## Live Deployment
 
-- **Website**: [https://crypto-mobile-pay.netlify.app/login](https://crypto-mobile-pay.netlify.app/login)
+- **Website**: [https://crypto-pmts.vercel.app/login](https://crypto-pmts.vercel.app/login)
 
-> **Note:** This project was deployed on Netlify, not through GitHub.
+> **Note:** This project is deployed on Vercel.
 
 ## Features
 
