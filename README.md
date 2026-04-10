@@ -14,7 +14,9 @@ A full-stack cryptocurrency payment platform enabling merchants to accept crypto
 - Merchant dashboard with payment tracking
 - QR code generation for customer payments
 - Secure business profile management with encrypted bank details
-- Coinbase Commerce integration for crypto payment invoices
+- NowPayments integration for crypto payment invoices
+
+> **Payment provider update (April 2026):** Coinbase Commerce dropped support for its free API tier and now requires identity verification for the CDP replacement. The payment layer was migrated to [NowPayments](https://nowpayments.io), which provides the same hosted invoice flow without mandatory merchant verification.
 - Real-time payment status updates
 - Row-level security with Supabase
 
@@ -24,7 +26,7 @@ A full-stack cryptocurrency payment platform enabling merchants to accept crypto
 **Backend**: Node.js, Express  
 **Database**: Supabase (PostgreSQL)  
 **Authentication**: Supabase Auth  
-**Payment Processing**: Coinbase Commerce (crypto invoices)  
+**Payment Processing**: NowPayments (crypto invoices)  
 **Security**: AES-256-CBC encryption, JWT tokens, CORS protection
 
 ## Quick Start
@@ -33,7 +35,7 @@ A full-stack cryptocurrency payment platform enabling merchants to accept crypto
 - Node.js 18+
 - npm or yarn
 - Supabase account
-- Coinbase Commerce account
+- NowPayments account
 
 ### Installation
 
@@ -49,25 +51,7 @@ cd backend && npm install && cd ..
 
 ### Environment Setup
 
-**Frontend (.env in root)**
-```bash
-VITE_API_URL=https://crypto-payments.onrender.com
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_COINBASE_API_KEY=your_coinbase_api_key
-```
-
-**Backend (backend/.env)**
-```bash
-PORT=3001
-CORS_ORIGINS=http://localhost:5173,http://localhost:5174,https://crypto-mobile-pay.netlify.app
-SUPABASE_URL=your_supabase_url
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-ENCRYPTION_KEY=your_64_char_hex_encryption_key
-MASTER_KEY=your_master_key
-COINBASE_API_KEY=your_coinbase_api_key
-NODE_ENV=development
-```
+Create `.env` files for root and `backend/` using your own credentials and provider dashboard values.
 
 ### Development
 

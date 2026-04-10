@@ -106,6 +106,56 @@ describe('Invalid token rejection', () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// POST /api/create-payment-link – input validation (public endpoint)
+// ---------------------------------------------------------------------------
+describe('POST /api/create-payment-link', () => {
+  test('missing amount → 400', async () => {
+    const res = await request(app)
+      .post('/api/create-payment-link')
+      .send({});
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/invalid amount/i);
+  });
+
+  test('zero amount → 400', async () => {
+    const res = await request(app)
+      .post('/api/create-payment-link')
+      .send({ amount: 0 });
+    expect(res.status).toBe(400);
+  });
+
+  test('negative amount → 400', async () => {
+    const res = await request(app)
+      .post('/api/create-payment-link')
+      .send({ amount: -5 });
+    expect(res.status).toBe(400);
+  });
+
+  test('non-numeric amount → 400', async () => {
+    const res = await request(app)
+      .post('/api/create-payment-link')
+      .send({ amount: 'abc' });
+    expect(res.status).toBe(400);
+  });
+
+  // With a valid amount but no API key configured → 500
+  test('valid amount but no NOWPAYMENTS_API_KEY → 500', async () => {
+    const original = process.env.NOWPAYMENTS_API_KEY;
+    delete process.env.NOWPAYMENTS_API_KEY;
+    const consoleErrSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const res = await request(app)
+      .post('/api/create-payment-link')
+      .send({ amount: 25 });
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toMatch(/not configured/i);
+
+    consoleErrSpy.mockRestore();
+    if (original) process.env.NOWPAYMENTS_API_KEY = original;
+  });
+});
 
 // ---------------------------------------------------------------------------
 // POST /api/business-profile – body validation (tested via 401 path to avoid
@@ -282,6 +332,49 @@ describe('Authenticated: POST /api/business-profile', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.business_profile.business_name).toBe('ACME Corp Updated');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// POST /api/create-payment-link – with API key configured
+// ---------------------------------------------------------------------------
+describe('POST /api/create-payment-link – with API key configured', () => {
+  afterEach(() => {
+    delete global.fetch;
+  });
+
+  test('proxies NowPayments response and returns url + id', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        invoice_url: 'https://nowpayments.io/payment/abc123',
+        id: 'inv_abc123',
+      }),
+    });
+
+    const res = await request(app)
+      .post('/api/create-payment-link')
+      .send({ amount: 50 });
+
+    expect(res.status).toBe(200);
+    expect(res.body.url).toContain('nowpayments');
+    expect(res.body.id).toBe('inv_abc123');
+  });
+
+  test('returns 502 when NowPayments API call fails', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({ message: 'Service unavailable' }),
+    });
+    const consoleErrSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const res = await request(app)
+      .post('/api/create-payment-link')
+      .send({ amount: 30 });
+
+    expect(res.status).toBe(502);
+    expect(res.body.error).toBe('Service unavailable');
+    consoleErrSpy.mockRestore();
   });
 });
 

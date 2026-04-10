@@ -646,6 +646,57 @@ app.get('/api/public/business-profile/:email', async (req, res) => {
 
 
 /**
+ * Create NowPayments invoice (PUBLIC endpoint)
+ * POST /api/create-payment-link
+ * Body: { amount }   (USD amount as a number)
+ * Returns: { url, id }  (hosted NowPayments invoice page)
+ */
+app.post('/api/create-payment-link', async (req, res) => {
+  try {
+    const { amount } = req.body;
+    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+      return res.status(400).json({ error: 'Invalid amount' });
+    }
+
+    const apiKey = process.env.NOWPAYMENTS_API_KEY;
+    if (!apiKey) {
+      console.error('❌ NOWPAYMENTS_API_KEY not set in backend/.env');
+      return res.status(500).json({ error: 'Payment provider not configured' });
+    }
+
+    const body = {
+      price_amount: parseFloat(parseFloat(amount).toFixed(2)),
+      price_currency: 'usd',
+      pay_currency: 'btc',
+      order_description: 'Merchant Payment',
+    };
+
+    const response = await fetch('https://api.nowpayments.io/v1/invoice', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('❌ NowPayments error:', data);
+      return res.status(502).json({ error: data.message || 'Payment provider error' });
+    }
+
+    console.log('✅ NowPayments invoice created:', data.id);
+    res.json({ url: data.invoice_url, id: data.id });
+
+  } catch (err) {
+    console.error('💥 Error creating payment link:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
  * Create payment record (PUBLIC endpoint - called when customer initiates payment)
  * POST /api/payments/create
  * 
